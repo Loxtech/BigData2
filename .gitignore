@@ -1,0 +1,14 @@
+# Python venv
+.venv/
+__pycache__/
+*.pyc
+
+# Hadoop & Spark tunge binære mapper
+hadoop-3.5.0/
+spark-4.2.0-bin-without-hadoop/
+*.tar.gz
+
+# Midlertidige logs og checkpoints
+logs/
+checkpoint/
+.spark-staging/
