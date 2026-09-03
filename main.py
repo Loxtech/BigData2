@@ -1,6 +1,7 @@
 from extract import extract_data_to_hdfs
 from transform import get_spark_session, transform_iris_data
 from load import load_data_to_hdfs
+from visualization import generate_scatterplot, generate_histogram, generate_boxplot
 
 # Konfiguration
 DATA_URL = "https://raw.githubusercontent.com/jbrownlee/Datasets/master/iris.csv"
@@ -21,6 +22,19 @@ def main():
 
     spark.stop()
     print("Batch ETL gennemført!")
+
+def run_visualizations(spark, hdfs_output_dir):
+    print("--- 4. VISUALISERING (Læser fra Hive) ---")
+    
+    # Læs data direkte fra Hive tabellen som en DataFrame
+    hive_df = spark.sql("SELECT * FROM flora_dw.iris_setosa_stream")
+    
+    # Kald de 3 metoder fra visualisering modulet
+    generate_scatterplot(hive_df, hdfs_output_dir)
+    generate_histogram(hive_df, hdfs_output_dir)
+    generate_boxplot(hive_df, hdfs_output_dir)
+    
+    print("Alle diagrammer er genereret og gemt på HDFS!")
 
 if __name__ == "__main__":
     main()

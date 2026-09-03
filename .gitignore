@@ -14,3 +14,4 @@ mysql-connector-j-8.3.0.jar
 logs/
 checkpoint/
 .spark-staging/
+Diagrammer
