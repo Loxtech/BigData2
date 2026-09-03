@@ -10,6 +10,12 @@ class SecurityModule:
     """
     Sikkerhedsmodul der implementerer både AES-CBC og AES-GCM.
     AES-GCM anvendes som primær metode jf. dokumentationen.
+
+    Begrundelse for AES-GCM:
+    - AES-GCM giver både kryptering og autentificering (integritet) i én operation.
+    - Det er mere sikkert end AES-CBC, som kræver ekstra MAC for at sikre integriteten.
+    - AES-GCM er modstandsdygtig over for padding oracle attacks, som AES-CBC kan være sårbar overfor.
+    - AES-GCM er også mere effektiv på moderne hardware, da det kan parallelliseres.
     """
 
     @staticmethod
