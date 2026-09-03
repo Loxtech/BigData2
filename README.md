@@ -33,7 +33,7 @@ sudo service mysql start
 
 ---
 
-## Krav 1 & Krav 3: Real-time ETL Streaming med AES-GCM Kryptering
+## Krav 1 & Krav 2: Real-time ETL Streaming med AES-GCM Kryptering
 
 Pipelinen overvåger HDFS-mappen `/user/hadoop/Input_dir`, filtrerer på `Iris-setosa`, krypterer kolonnen `species` ved hjælp af AES-GCM via PySpark UDFs (Krav 3) og gemmer data som Parquet direkte i Hive Data Warehouse.
 
@@ -71,7 +71,7 @@ SELECT * FROM iris_setosa_stream LIMIT 10;
 
 ---
 
-## Krav 2: Visualiseringsmodul & HDFS Eksport
+## Krav 3: Visualiseringsmodul & HDFS Eksport
 
 Visualiseringsmodulet (`visualization.py`) læser de krypterede Parquet-data ud fra Hive på HDFS, dekrypterer `species`-kolonnen i hukommelsen via Pandas (`p_df`), genererer tre analytiske grafer og uploader dem direkte til `/user/hadoop/Output_dir` på HDFS.
 
