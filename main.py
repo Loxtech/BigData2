@@ -1,40 +1,43 @@
-from extract import extract_data_to_hdfs
-from transform import get_spark_session, transform_iris_data
-from load import load_data_to_hdfs
-from visualization import generate_scatterplot, generate_histogram, generate_boxplot
+import time
+from extract import extract_data, URL, HDFS_INPUT_DIR
+from visualization import generate_scatterplot, generate_histogram, generate_boxplot, HDFS_OUTPUT_DIR
+from fetch_charts import fetch_images
+from pyspark.sql import SparkSession
 
-# Konfiguration
-DATA_URL = "https://raw.githubusercontent.com/jbrownlee/Datasets/master/iris.csv"
-HEADER_LINE = "sepal_length,sepal_width,petal_length,petal_width,species"
-HDFS_INPUT_DIR = "/user/hadoop/Input_dir"
-HDFS_OUTPUT_DIR = "/user/hadoop/Output_dir"
+HIVE_DATA_PATH = "hdfs://localhost:9000/user/hive/warehouse/flora_dw.db/iris_setosa_stream"
 
 def main():
-    print("--- 1. EXTRACT (Streaming til HDFS) ---")
-    hdfs_input_path = extract_data_to_hdfs(DATA_URL, HDFS_INPUT_DIR, HEADER_LINE)
-
-    print("--- 2. TRANSFORM (PySpark på HDFS) ---")
-    spark = get_spark_session()
-    transformed_df = transform_iris_data(spark, hdfs_input_path)
-
-    print("--- 3. LOAD (Skriver til HDFS) ---")
-    load_data_to_hdfs(transformed_df, DATA_URL, HDFS_OUTPUT_DIR)
-
-    spark.stop()
-    print("Batch ETL gennemført!")
-
-def run_visualizations(spark, hdfs_output_dir):
-    print("--- 4. VISUALISERING (Læser fra Hive) ---")
+    # 1. Extract: Hent data direkte fra nettet til HDFS input-mappe
+    print("\n--- 1. EXTRACT (Henter data via HTTP til HDFS) ---")
+    extract_data(URL)
     
-    # Læs data direkte fra Hive tabellen som en DataFrame
-    hive_df = spark.sql("SELECT * FROM flora_dw.iris_setosa_stream")
-    
-    # Kald de 3 metoder fra visualisering modulet
-    generate_scatterplot(hive_df, hdfs_output_dir)
-    generate_histogram(hive_df, hdfs_output_dir)
-    generate_boxplot(hive_df, hdfs_output_dir)
-    
-    print("Alle diagrammer er genereret og gemt på HDFS!")
+    print("\n Vent da venligst ca. 5-10 sekunder på, at realtime_pipeline.py opdager den nye fil...")
+    time.sleep(8)  # Giver PySpark Streaming tid til at opfange filen og skrive til Hive
+
+    # 2. Visualisering: Læs Parquet direkte fra Hive Warehouse
+    print("\n--- 2. VISUALISERING (Læser fra Hive & genererer grafer) ---")
+    spark = SparkSession.builder \
+        .appName("Flora_Visualization_Main") \
+        .getOrCreate()
+    spark.sparkContext.setLogLevel("ERROR")
+
+    try:
+        hive_df = spark.read.parquet(HIVE_DATA_PATH)
+        print(f"Hentede {hive_df.count()} rækker fra Hive. Genererer diagrammer...")
+        
+        generate_scatterplot(hive_df, HDFS_OUTPUT_DIR)
+        generate_histogram(hive_df, HDFS_OUTPUT_DIR)
+        generate_boxplot(hive_df, HDFS_OUTPUT_DIR)
+    except Exception as e:
+        print(f"[FEJL] Kunne ikke læse data fra Hive endnu. Er realtime_pipeline.py startet? Fejl: {e}")
+    finally:
+        spark.stop()
+
+    # 3. Fetch: Hent diagrammer ned til lokal mappe
+    print("\n--- 3. FETCH CHARTS (Eksporterer diagrammer til Windows) ---")
+    fetch_images()
+
+    print("\n [SUCCESS] Arbejdsgangen er gennemført!")
 
 if __name__ == "__main__":
     main()
