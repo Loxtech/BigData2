@@ -3,12 +3,15 @@
 __pycache__/
 *.pyc
 
-# Hadoop & Spark tunge binære mapper
+# Hadoop, Hive & Spark tunge binære mapper
 hadoop-3.5.0/
+hive/
 spark-4.2.0-bin-without-hadoop/
 *.tar.gz
+mysql-connector-j-8.3.0.jar
 
 # Midlertidige logs og checkpoints
 logs/
 checkpoint/
 .spark-staging/
+Diagrammer
