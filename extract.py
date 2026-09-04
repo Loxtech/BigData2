@@ -18,7 +18,7 @@ def extract_data(url=URL):
     hdfs_file_path = f"{HDFS_INPUT_DIR}/{filename}"
 
     # -------------------------------------------------------------------------
-    # DOKUMENTATION TIL OPGAVEN (KODE-KOMMENTARER):
+    # DOKUMENTATION TIL OPGAVEN Requests + HDFS:
     #
     # 1. Datasikkerhed og Command-Line Injection:
     #    Ved brug af 'requests' styres HTTP-kaldet fuldstændigt af Python-koden, 
